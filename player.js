@@ -269,7 +269,7 @@ class MediaSessionControls {
     /**
      * Binds all the neccessary action handlers.
      */
-    setup() {
+    static setup() {
         if (!MediaSessionControls.audio_element) {
             MediaSessionControls.audio_element = document.querySelector('audio');
         }
