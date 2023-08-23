@@ -221,7 +221,7 @@ class PersistentData {
    * @param data <?> the data.
    * @param mode <int>, -1=delete, 0=overwrite, 1=append (if [existing type is array, and mode == 1])
    */
-  update(key, data = null, mode = 0) {
+  static update(key, data = null, mode = 0) {
     if (key == null) {
       return key;
     }
@@ -247,7 +247,7 @@ class PersistentData {
    * null if it does not exist.
    * SECURITY NOTE: if attackers are able to override the values stored in the localstorage field, then they could possibly execute arbitrary code.
    */
-  load(key) {
+  static load(key) {
     if (key == null) {
       return key;
     }
@@ -378,7 +378,7 @@ class MediaSessionControls {
 
 class SwipeControls {
 
-    setup() {
+    static setup() {
         SwipeControls.swipedetect(document.body, function(swipedir){
             Logger.log(`Swipe detected: ${swipedir} +`)
             //"none", "left", "right", "top", or "down"
@@ -390,7 +390,7 @@ class SwipeControls {
             Logger.log(`Swipe detected: ${swipedir} -`)
         });
     }
-    swipedetect(el, callback){
+    static swipedetect(el, callback){
         var touchsurface = el,
         swipedir,
         startX,
@@ -414,10 +414,11 @@ class SwipeControls {
             e.preventDefault()
         }, false)
       
+        /*
         touchsurface.addEventListener('touchmove', function(e){
-            e.preventDefault() // prevent scrolling when inside DIV
+            e.preventDefault() // prevent scrolling when inside DIV?
         }, false)
-      
+      */
         touchsurface.addEventListener('touchend', function(e){
             var touchobj = e.changedTouches[0]
             distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
