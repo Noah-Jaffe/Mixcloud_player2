@@ -1,0 +1,13 @@
+:root {
+    color-scheme: dark;
+}
+
+#log_table:has(#log_table_body:empty) {
+    display: none;
+}
+#log_table {
+    font-size:10pt;
+    word-wrap:break-word;
+    font-family: Consolas, monaco, monospace;
+}
+
