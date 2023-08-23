@@ -323,7 +323,7 @@ class MediaSessionControls {
     static seekbackward(){
         Logger.log('seekbackward +');
         const skip_time = arguments.seekOffset || MediaSessionControls.default_skip_time;
-        MediaSessionControls.audio_element?.currentTime = Math.max(MediaSessionControls.audio_element?.currentTime - skip_time,0);
+        MediaSessionControls.audio_element.currentTime = Math.max(MediaSessionControls.audio_element?.currentTime - skip_time,0);
         navigator.mediaSession.setPositionState({
             duration: MediaSessionControls.audio_element?.duration, 
             playbackRate: MediaSessionControls.audio_element?.playbackRate,
