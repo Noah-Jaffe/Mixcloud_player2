@@ -90,7 +90,7 @@ class Logger {
     tbl.appendChild(newRow);
     tbl.hidden = false;
     if (timeout > 0) {
-      removeFadeOutAfter(newRow, Math.max(timeout, 1));
+      Logger.removeFadeOutAfter(newRow, Math.max(timeout, 1));
     }
   }
 
