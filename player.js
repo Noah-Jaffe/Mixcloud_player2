@@ -334,7 +334,7 @@ class MediaSessionControls {
     static seekforward(){
         Logger.log('seekforward +');
         const skip_time = arguments.seekOffset || MediaSessionControls.default_skip_time;
-        MediaSessionControls.audio_element?.currentTime = Math.min(MediaSessionControls.audio_element?.currentTime + skip_time,0);
+        MediaSessionControls.audio_element.currentTime = Math.min(MediaSessionControls.audio_element?.currentTime + skip_time,0);
         navigator.mediaSession.setPositionState({
             duration: MediaSessionControls.audio_element?.duration,
             playbackRate: MediaSessionControls.audio_element?.playbackRate,
@@ -354,7 +354,7 @@ class MediaSessionControls {
             playbackRate: MediaSessionControls.audio_element.playbackRate,
             position: arguments.seekTime,
         });
-        Logger.log('seekto +');
+        Logger.log('seekto -');
     }
     static togglemicrophone(){
         Logger.log('Not implemented: togglemicrophone');
