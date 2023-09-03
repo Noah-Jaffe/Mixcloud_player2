@@ -1,6 +1,10 @@
+/** Generic-ish functions used throughout the app.
+ * Interact with internet
+ * Formatting values
+ * etc...
+ */
 class Util {
-  /**
-   * Fetches the response from the URL. If offline, it will attempt to wait for up to `max_attempts=10` tries, 1 minutes each, for the connection to go back online.
+  /**Fetches the response from the URL. If offline, it will attempt to wait for up to `max_attempts=10` tries, 1 minutes each, for the connection to go back online.
    * @param url <String> the url to get.
    * @param max_attempts <int> the number of times to attempt before aborting.
    * @throws Exceptions that are raised while fetching the url (not including NetworkErrors), or an offline timeout error.
@@ -31,9 +35,7 @@ class Util {
     }
     throw `Timed out trying to get ${url}`;
   }
-
-  /**
-   * Extracts json from a successful fetch.
+  /**Extracts json from a successful fetch.
    * @param url <String> The url to extract JSON from.
    * @returns result of JSON.parse.
    */
@@ -44,12 +46,12 @@ class Util {
     Logger.log(data,10);
     return data;
   }
-  /**
-   * @param sec <number> seconds.
+  /** converts numeric to human readable timestamp d h s.ms
+   *  @param sec <number> seconds.
    * @returns <String> simplified timestamp.
    */
   static sec_to_human_readable_timestamp(sec) {return `${String(parseInt(sec / 3600)).padStart(2, "0")}:${String(parseInt((sec % 3600) / 60)).padStart(2, "0")}:${parseInt(sec) % 60}`;}
-  /**
+  /** attempts to detect if using a mobile device/mode
    * @returns true if on mobile device, false otherwise.
    */
   static mobileCheck() {
@@ -57,9 +59,31 @@ class Util {
   }
 }
 
+/** Logging system to the #log_table_body */
 class Logger {
-  /**
-   * Writes data to the log table at the bottom of the page
+  /** Attaches an HTML table for logging to the given element.
+   * NOTE: not really needed if the table is hardcoded in the HTML
+   * @param {HTMLElement} elementToAttachTo 
+   */
+  static attachLoggerTable(elementToAttachTo) {
+    var table = document.createElement('table');
+    table.setAttribute('id','log_table');
+    var thead = document.createElement('thead');
+    table.appendChild(thead);
+    thead.setAttribute('id','log_table_header');
+    var tr = document.createElement('tr');
+    thead.appendChild(tr);
+    ['Timestamp','Message'].forEach(h=>{
+      var th = document.createElement('th'); 
+      th.appendChild(document.createTextNode(h));
+      tr.appendChild(th);
+    })
+    var tbody = document.createElement('tbody');
+    tbody.setAttribute('id','log_table_body');
+    table.appendChild(tbody);
+    elementToAttachTo.appendChild(table);
+  }
+  /**Writes data to the log table at the bottom of the page
    * @param {*} val the value to write
    * @param {Number} timeout the seconds before the log message is destroyed, <=0 for no distruction.
    */
@@ -86,15 +110,14 @@ class Logger {
     if (is_secondary_val_type) {
       newRow.childNodes[1].style.color = "red";
     }
-    var tbl = document.querySelector("#log_table_body");
+    var tbl = document.querySelector('#log_table_body');
     tbl.appendChild(newRow);
     tbl.hidden = false;
     if (timeout > 0) {
       Logger.removeFadeOutAfter(newRow, Math.max(timeout, 1));
     }
   }
-
-  /**
+  /** Fades an element after a given time, and deletes the object from the DOM/memory.
    * @param {HTMLElement} el the element to be dissapered
    * @param {*} seconds the seconds to dissapear after
    */
@@ -261,7 +284,6 @@ class PersistentData {
   }
 }
 
-
 class MediaSessionControls {
     static audio_element = null;
     static default_skip_time = 60;
@@ -377,67 +399,69 @@ class MediaSessionControls {
 }
 
 class SwipeControls {
-
-    static setup() {
-        SwipeControls.swipedetect(document.body, function(swipedir){
-            Logger.log(`Swipe detected: ${swipedir} +`)
-            //"none", "left", "right", "top", or "down"
-            if (swipedir == 'left') {
-                MediaSessionControls.previoustrack();
-            } else if (swipedir == 'right') {
-                MediaSessionControls.nexttrack();
-            }
-            Logger.log(`Swipe detected: ${swipedir} -`)
-        });
-    }
-    static swipedetect(el, callback){
-        var touchsurface = el,
-        swipedir,
-        startX,
-        startY,
-        distX,
-        distY,
-        threshold = 50, //required min distance traveled to be considered swipe
-        restraint = 100, // maximum distance allowed at the same time in perpendicular direction
-        allowedTime = 300, // maximum time allowed to travel that distance
-        elapsedTime,
-        startTime,
-        handleswipe = callback || function(swipedir){}
+  /** Sets up controls/listeners to the given touchsurface
+   * @param {HTMLElement | null} touchsurface The touch surface to listen for swipes. If null, is set to document.body.
+   * @param {Number} threshold required min distance traveled to be considered swipe
+   * @param {Number} restraint maximum distance allowed at the same time in perpendicular direction
+   * @param {Number} allowedTime maximum time allowed to travel that distance
+   */
+  static setup(touchsurface=null, threshold=50, restraint=100, allowedTime=300) {
+    var touchsurface = touchsurface,
+      swipedir,
+      startX,
+      startY,
+      distX,
+      distY,
+      threshold = threshold,
+      restraint = restraint,
+      allowedTime = allowedTime,
+      elapsedTime,
+      startTime;
       
-        touchsurface.addEventListener('touchstart', function(e){
-            var touchobj = e.changedTouches[0]
-            swipedir = 'none'
-            dist = 0
-            startX = touchobj.pageX
-            startY = touchobj.pageY
-            startTime = new Date().getTime() // record time when finger first makes contact with surface
-            e.preventDefault()
-        }, false)
       
-        /*
-        touchsurface.addEventListener('touchmove', function(e){
-            e.preventDefault() // prevent scrolling when inside DIV?
-        }, false)
-      */
-        touchsurface.addEventListener('touchend', function(e){
-            var touchobj = e.changedTouches[0]
-            distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
-            distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
-            elapsedTime = new Date().getTime() - startTime // get time elapsed
-            if (elapsedTime <= allowedTime){ // first condition for awipe met
-                if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
-                    swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
-                }
-                else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
-                    swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
-                }
+      touchsurface.addEventListener('touchstart', function(e){
+        var touchobj = e.changedTouches[0];
+        swipedir = 'none';
+        dist = 0;
+        startX = touchobj.pageX;
+        startY = touchobj.pageY;
+        startTime = new Date().getTime(); // record time when finger first makes contact with surface
+        e.preventDefault();
+      }, false);
+      // prevent scrolling when inside touchsurface
+      touchsurface.addEventListener('touchmove', function(e){
+        e.preventDefault();
+      }, false);
+      touchsurface.addEventListener('touchend', function(e){
+        var touchobj = e.changedTouches[0];
+        distX = touchobj.pageX - startX; // get horizontal dist traveled while in contact with surface
+        distY = touchobj.pageY - startY; // get vertical dist traveled while in contact with surface
+        elapsedTime = new Date().getTime() - startTime; // get time elapsed
+        var direction = "";
+        if (elapsedTime <= allowedTime){ // first condition for swipe met
+          var dirin360 = Math.atan2(startX*touchobj.pageY - startY*touchobj.pageX, startX*touchobj.pageX + startY*touchobj.pageY);
+          Logger.log(`Swiped in angle of ${dirin360}`,0);
+          if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
+                swipedir = (distX < 0)? 'left' : 'right'; // if dist traveled is negative, it indicates left swipe
             }
-            handleswipe(swipedir)
-            e.preventDefault()
-        }, false)
-    }
+            else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
+                swipedir = (distY < 0)? 'up' : 'down'; // if dist traveled is negative, it indicates up swipe
+            }
+            Logger.log(`Swiped in dir of ${swipedir}`);
+            SwipeControls.handleswipe360(dirin360);
+        }
+        e.preventDefault();
+      }, false);
+  }
 
 
+  /** Swipe handler.
+   * @param {Number} angle (0 to 360?) Todo figure out what the fuck this does
+   */
+  static handleswipe360(angle) {
+    Logger.log(angle,1);
+
+  }
 }
 /**
  * onload event:
@@ -446,4 +470,40 @@ class SwipeControls {
  * 3. Retreives the playlists.
  * 4. Starts playing music.
  */
-window.onload = async function () {};
+window.onload = async function () {
+  Logger.log('Setting up!',1);
+  SwipeControls.setup(document.body);
+};
+
+
+class DEBUG {
+  static listAllEventListeners() {
+    const allElements = Array.prototype.slice.call(document.querySelectorAll('*'));
+    allElements.push(document);
+    allElements.push(window);
+  
+    const types = [];
+  
+    for (let ev in window) {
+      if (/^on/.test(ev)) types[types.length] = ev;
+    }
+  
+    let elements = [];
+    for (let i = 0; i < allElements.length; i++) {
+      const currentElement = allElements[i];
+      for (let j = 0; j < types.length; j++) {
+        if (typeof currentElement[types[j]] === 'function') {
+          elements.push({
+            "node": currentElement,
+            "type": types[j],
+            "func": currentElement[types[j]].toString(),
+          });
+        }
+      }
+    }
+  
+    console.table(elements.sort(function(a,b) {
+      return a.type.localeCompare(b.type);
+    }));
+  }
+}
